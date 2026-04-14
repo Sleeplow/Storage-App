@@ -21,9 +21,12 @@ export default function Layout({ children }) {
         </Link>
         <SearchBar />
         <nav className="app-nav">
+          <Link to="/members" className="btn btn-ghost btn-nav">
+            👥
+          </Link>
           {user && (
-            <button onClick={handleLogout} className="btn btn-ghost">
-              Quitter
+            <button onClick={handleLogout} className="btn btn-ghost btn-nav">
+              ⎋
             </button>
           )}
         </nav>

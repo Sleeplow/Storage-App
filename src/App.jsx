@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import BoxDetailPage from './pages/BoxDetailPage'
+import MembersPage from './pages/MembersPage'
+import JoinPage from './pages/JoinPage'
 import NotFoundPage from './pages/NotFoundPage'
 import './App.css'
 
@@ -17,6 +19,16 @@ export default function App() {
           {/* Routes publiques */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
+          {/* Rejoindre un espace (utilisateur connecté) */}
+          <Route
+            path="/join"
+            element={
+              <ProtectedRoute>
+                <JoinPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Routes protégées */}
           <Route
@@ -39,8 +51,17 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/members"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MembersPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Redirections */}
           <Route path="/index.html" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
