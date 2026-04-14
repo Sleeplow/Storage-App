@@ -31,10 +31,10 @@ function BugReportModal({ onClose }) {
   }
 
   return (
-    <div className="settings-overlay" onClick={onClose}>
+    <div className="modal-overlay" style={{ zIndex: 400 }} onClick={onClose}>
       <div
         className="modal-card modal-card-lg"
-        style={{ position: 'relative', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}
+        style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
