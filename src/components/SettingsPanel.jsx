@@ -1,45 +1,36 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
-import { collection, collectionGroup, getDocs, query, where } from 'firebase/firestore'
+import { collectionGroup, getDocs, query, where } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
 import { useAuth } from '../context/AuthContext'
+import { useBoxes } from '../hooks/useBoxes'
 
 export default function SettingsPanel({ open, onClose, theme, setTheme }) {
   const { user, workspaceId } = useAuth()
   const navigate = useNavigate()
-  const [stats, setStats] = useState(null)
 
+  // useBoxes uses the same onSnapshot listener as HomePage — always works
+  const { boxes, loading: boxesLoading } = useBoxes(open ? workspaceId : null)
+  const [photoCount, setPhotoCount] = useState(null)
+
+  const boxCount = boxes.length
+  const itemCount = boxes.reduce((sum, b) => sum + (b.itemCount || 0), 0)
+
+  // Fetch photo count separately via collectionGroup
   useEffect(() => {
     if (!open || !workspaceId) return
     let cancelled = false
+    setPhotoCount(null)
 
-    async function loadStats() {
-      try {
-        // Boxes + item counts from itemCount fields
-        const boxesSnap = await getDocs(
-          collection(db, 'workspaces', workspaceId, 'boxes')
-        )
-        const boxCount = boxesSnap.size
-        const itemCount = boxesSnap.docs.reduce(
-          (sum, d) => sum + (d.data().itemCount || 0),
-          0
-        )
+    getDocs(query(collectionGroup(db, 'items'), where('workspaceId', '==', workspaceId)))
+      .then((snap) => {
+        if (!cancelled) setPhotoCount(snap.docs.filter((d) => d.data().photoUrl).length)
+      })
+      .catch(() => {
+        if (!cancelled) setPhotoCount('—')
+      })
 
-        // Photos: items with a non-empty photoUrl
-        const itemsSnap = await getDocs(
-          query(collectionGroup(db, 'items'), where('workspaceId', '==', workspaceId))
-        )
-        const photoCount = itemsSnap.docs.filter((d) => d.data().photoUrl).length
-
-        if (!cancelled) setStats({ boxCount, itemCount, photoCount })
-      } catch {
-        if (!cancelled) setStats({ boxCount: '—', itemCount: '—', photoCount: '—' })
-      }
-    }
-
-    setStats(null)
-    loadStats()
     return () => { cancelled = true }
   }, [open, workspaceId])
 
@@ -56,6 +47,7 @@ export default function SettingsPanel({ open, onClose, theme, setTheme }) {
   if (!open) return null
 
   const displayName = user?.displayName || user?.email || 'Utilisateur'
+  const statsReady = !boxesLoading
 
   return (
     <div className="settings-overlay" onClick={onClose}>
@@ -92,20 +84,22 @@ export default function SettingsPanel({ open, onClose, theme, setTheme }) {
           {/* Service stats */}
           <div className="settings-section">
             <p className="settings-section-title">Espace de rangement</p>
-            {stats ? (
+            {statsReady ? (
               <>
                 <div className="settings-stat-row">
                   <span className="settings-stat-icon">📦</span>
                   <span className="settings-stat-label">Firebase</span>
                   <span className="settings-stat-value">
-                    {stats.boxCount} boîte{stats.boxCount !== 1 ? 's' : ''} · {stats.itemCount} item{stats.itemCount !== 1 ? 's' : ''}
+                    {boxCount} boîte{boxCount !== 1 ? 's' : ''} · {itemCount} item{itemCount !== 1 ? 's' : ''}
                   </span>
                 </div>
                 <div className="settings-stat-row">
                   <span className="settings-stat-icon">🖼️</span>
                   <span className="settings-stat-label">Cloudinary</span>
                   <span className="settings-stat-value">
-                    {stats.photoCount} photo{stats.photoCount !== 1 ? 's' : ''}
+                    {photoCount === null
+                      ? '…'
+                      : `${photoCount} photo${photoCount !== 1 ? 's' : ''}`}
                   </span>
                 </div>
               </>

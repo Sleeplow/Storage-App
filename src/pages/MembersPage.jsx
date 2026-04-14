@@ -134,13 +134,15 @@ export default function MembersPage() {
               {inviteCode ? (
                 <div className="invite-code-wrap">
                   <div style={{ width: '100%' }}>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted, #6b7280)', marginBottom: '0.35rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.35rem' }}>
                       Lien à partager (SMS, courriel…)
                     </p>
                     <p style={{
                       fontSize: '0.8rem',
                       wordBreak: 'break-all',
-                      background: 'var(--surface-2, #f3f4f6)',
+                      background: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      border: '1px solid var(--color-border)',
                       padding: '0.5rem 0.75rem',
                       borderRadius: '0.5rem',
                       marginBottom: '0.5rem',
@@ -148,7 +150,7 @@ export default function MembersPage() {
                     }}>
                       {inviteLink}
                     </p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted, #6b7280)' }}>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                       Code seul : <strong style={{ letterSpacing: '0.1em' }}>{inviteCode}</strong>
                     </p>
                   </div>
