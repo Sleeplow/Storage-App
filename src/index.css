@@ -271,6 +271,39 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* Bouton Google */
+.btn-google {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text);
+  width: 100%;
+  gap: 0.625rem;
+  font-weight: 500;
+}
+
+.btn-google:hover:not(:disabled) {
+  background-color: var(--color-bg);
+  border-color: #aaa;
+}
+
+/* Séparateur "ou" */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
 /* Page générique */
 .page {
   padding: 0.5rem 0;
