@@ -5,6 +5,7 @@ import { useTheme } from '../hooks/useTheme'
 import SearchBar from './SearchBar'
 import SettingsPanel from './SettingsPanel'
 
+
 export default function Layout({ children }) {
   const { user } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -20,6 +21,9 @@ export default function Layout({ children }) {
         </Link>
         <SearchBar />
         <nav className="app-nav">
+          <Link to="/members" className="btn btn-ghost btn-nav" aria-label="Membres">
+            👥
+          </Link>
           <button
             className="nav-avatar-btn"
             onClick={() => setSettingsOpen(true)}
