@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="description" content="Gérez l'inventaire de vos boîtes de rangement en famille" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="StorageApp" />
+    <title>StorageApp</title>
+    <script>
+      // Décode la redirection du 404.html (routing SPA GitHub Pages)
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        var search = location.search;
+        if (search.indexOf('?/') === 0) {
+          var decoded = '/' + search.slice(2).replace(/~and~/g, '&');
+          history.replaceState(null, null, decoded + location.hash);
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-BHMpdwfM.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BCCq-o_7.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
