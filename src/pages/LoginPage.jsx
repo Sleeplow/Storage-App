@@ -1,38 +1,25 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { Navigate } from 'react-router-dom'
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { appError, mapFirebaseError } from '../services/errorCodes'
+import { useAuth } from '../context/AuthContext'
 
 const googleProvider = new GoogleAuthProvider()
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const { user } = useAuth()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
 
-  const handleEmailLogin = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      await signInWithEmailAndPassword(auth, email, password)
-      navigate('/')
-    } catch (err) {
-      setError(appError(mapFirebaseError(err) ?? 'AUTH-003', err))
-    } finally {
-      setLoading(false)
-    }
-  }
+  if (user) return <Navigate to="/" replace />
 
   const handleGoogleLogin = async () => {
     setError('')
     setLoading(true)
     try {
       await signInWithPopup(auth, googleProvider)
-      navigate('/')
+      // <Navigate> above takes over once auth state updates
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         setError(appError(mapFirebaseError(err) ?? 'AUTH-007', err))
@@ -46,7 +33,7 @@ export default function LoginPage() {
     <div className="auth-container">
       <div className="auth-card">
         <h1 className="auth-title">StorageApp</h1>
-        <p className="auth-subtitle">Connectez-vous à votre espace</p>
+        <p className="auth-subtitle">Votre inventaire de rangement familial</p>
 
         <button
           type="button"
@@ -55,48 +42,10 @@ export default function LoginPage() {
           disabled={loading}
         >
           <GoogleIcon />
-          Continuer avec Google
+          {loading ? 'Connexion…' : 'Continuer avec Google'}
         </button>
 
-        <div className="auth-divider">
-          <span>ou</span>
-        </div>
-
-        <form onSubmit={handleEmailLogin} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="votre@email.com"
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="password">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
-
-        <p className="auth-link">
-          Pas encore de compte ?{' '}
-          <Link to="/register">Créer un compte</Link>
-        </p>
+        {error && <p className="error-message" style={{ marginTop: '1rem' }}>{error}</p>}
       </div>
     </div>
   )
@@ -112,4 +61,3 @@ function GoogleIcon() {
     </svg>
   )
 }
-
