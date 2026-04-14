@@ -46,10 +46,32 @@ export default function MembersPage() {
     }
   }
 
+  const inviteLink = inviteCode
+    ? `${window.location.origin}/join?code=${inviteCode}`
+    : null
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(inviteCode)
+    navigator.clipboard.writeText(inviteLink)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      // Partage natif : iOS/Android ouvre Mail, Messages, WhatsApp, etc.
+      try {
+        await navigator.share({
+          title: 'Invitation StorageApp',
+          text: 'Rejoins notre espace de rangement familial :',
+          url: inviteLink,
+        })
+      } catch {
+        // L'utilisateur a annulé le partage — pas d'erreur à afficher
+      }
+    } else {
+      // Fallback desktop : ouvre le client mail par défaut
+      window.location.href = `mailto:?subject=${encodeURIComponent('Invitation StorageApp')}&body=${encodeURIComponent(`Rejoins notre espace de rangement familial :\n${inviteLink}`)}`
+    }
   }
 
   const handleRemove = async () => {
@@ -111,13 +133,36 @@ export default function MembersPage() {
               </p>
               {inviteCode ? (
                 <div className="invite-code-wrap">
-                  <span className="invite-code">{inviteCode}</span>
-                  <button className="btn btn-outline" style={{ width: 'auto' }} onClick={handleCopy}>
-                    {copied ? '✓ Copié !' : 'Copier'}
-                  </button>
-                  <button className="btn btn-ghost" style={{ width: 'auto' }} onClick={() => setInviteCode(null)}>
-                    Nouveau code
-                  </button>
+                  <div style={{ width: '100%' }}>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted, #6b7280)', marginBottom: '0.35rem' }}>
+                      Lien à partager (SMS, courriel…)
+                    </p>
+                    <p style={{
+                      fontSize: '0.8rem',
+                      wordBreak: 'break-all',
+                      background: 'var(--surface-2, #f3f4f6)',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '0.5rem',
+                      marginBottom: '0.5rem',
+                      fontFamily: 'monospace',
+                    }}>
+                      {inviteLink}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted, #6b7280)' }}>
+                      Code seul : <strong style={{ letterSpacing: '0.1em' }}>{inviteCode}</strong>
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', width: '100%', flexWrap: 'wrap' }}>
+                    <button className="btn btn-primary" style={{ width: 'auto' }} onClick={handleShare}>
+                      {typeof navigator !== 'undefined' && navigator.share ? '↗ Partager' : '✉ Envoyer par courriel'}
+                    </button>
+                    <button className="btn btn-outline" style={{ width: 'auto' }} onClick={handleCopy}>
+                      {copied ? '✓ Copié !' : 'Copier le lien'}
+                    </button>
+                    <button className="btn btn-ghost" style={{ width: 'auto' }} onClick={() => setInviteCode(null)}>
+                      Nouveau code
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button

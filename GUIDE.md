@@ -115,12 +115,18 @@ La recherche porte sur le **nom** et la **description** de tous les objets de vo
 
 ## 8. Inviter un membre de la famille
 
-> Seul l'**administrateur** de l'espace peut générer des codes d'invitation.
+> Seul l'**administrateur** de l'espace peut générer des liens d'invitation.
 
-1. Cliquez sur l'icône **👥 membres** en haut à droite
+1. Cliquez sur l'icône **👥** en haut à droite de l'écran (à côté de la barre de recherche)
 2. Dans la section « Inviter un membre », cliquez sur **+ Générer un code d'invitation**
-3. Un code de 8 caractères apparaît (ex : `AB3C7D2E`)
-4. Cliquez sur **Copier** et partagez ce code avec le membre à inviter (SMS, message, etc.)
+3. Un **lien complet** apparaît, par exemple :
+   `https://storage.sleeplow.ca/join?code=AB3C7D2E`
+4. Choisissez comment envoyer le lien :
+   - **↗ Partager** (sur iPhone/Android) — ouvre la feuille de partage native : Mail, Messages, WhatsApp, etc.
+   - **✉ Envoyer par courriel** (sur ordinateur) — ouvre votre client mail avec le lien déjà rédigé
+   - **Copier le lien** — copie le lien pour le coller où vous voulez
+
+La personne n'a qu'à **cliquer sur le lien** — elle arrivera directement sur la page avec le code déjà rempli.
 
 **Limites du code :**
 - Valable **7 jours**
@@ -131,16 +137,21 @@ La recherche porte sur le **nom** et la **description** de tous les objets de vo
 
 ## 9. Rejoindre l'espace d'un proche
 
-Si un membre de votre famille vous a partagé un code d'invitation :
+Si un membre de votre famille vous a envoyé un lien d'invitation :
 
-1. Créez d'abord un compte (section 1)
-2. Une fois connecté, accédez à la page de jointure — l'URL vous sera communiquée avec le code
-3. Entrez le code de 8 caractères
-4. Cliquez sur **Rejoindre**
+**Étape 1 — Créer un compte** (si vous n'en avez pas encore)
+1. Ouvrez le lien reçu dans votre navigateur
+2. Si vous n'êtes pas connecté, vous serez redirigé vers la page de connexion
+3. Créez un compte avec Google ou avec un email + mot de passe
+
+**Étape 2 — Rejoindre l'espace**
+1. Une fois connecté, retournez sur le lien reçu (ou recliquez dessus)
+2. Le code sera déjà rempli automatiquement
+3. Cliquez sur **Rejoindre**
 
 Vous avez maintenant accès à l'espace familial et voyez toutes les boîtes.
 
-> Si vous avez déjà créé votre propre espace vide avant de recevoir le code, vous pouvez quand même rejoindre l'espace d'un proche en utilisant le code directement.
+> **Sans le lien ?** Si vous avez seulement reçu le code (8 caractères), vous pouvez aller manuellement sur `storage.sleeplow.ca/join` et entrer le code à la main.
 
 ---
 
