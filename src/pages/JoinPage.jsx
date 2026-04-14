@@ -11,11 +11,12 @@ export default function JoinPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  // Pré-remplir si le code est dans l'URL (?code=XXXXXX)
   useEffect(() => {
     const c = searchParams.get('code')
-    if (c) setCode(c.toUpperCase())
+    if (c) setCode(sanitizeCode(c))
   }, [searchParams])
+
+  const sanitizeCode = (val) => val.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)
 
   const handleJoin = async (e) => {
     e.preventDefault()
@@ -23,8 +24,8 @@ export default function JoinPage() {
     setLoading(true)
     try {
       await joinWithCode(code, user)
-      // Recharger la page pour que AuthContext récupère le nouveau workspaceId
-      window.location.href = '/'
+      // Rechargement complet pour que AuthContext récupère le nouveau workspaceId
+      window.location.replace('/')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -44,15 +45,16 @@ export default function JoinPage() {
               id="code"
               type="text"
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="ex : AB12CD"
-              maxLength={6}
+              onChange={(e) => setCode(sanitizeCode(e.target.value))}
+              placeholder="ex : AB3C7D2E"
+              maxLength={8}
               required
+              autoComplete="off"
               style={{ letterSpacing: '0.2em', textAlign: 'center', fontWeight: '700', fontSize: '1.25rem' }}
             />
           </div>
           {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="btn btn-primary" disabled={loading || code.length < 6}>
+          <button type="submit" className="btn btn-primary" disabled={loading || code.length < 8}>
             {loading ? 'Vérification…' : 'Rejoindre'}
           </button>
         </form>
