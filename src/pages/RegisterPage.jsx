@@ -1,19 +1,23 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
 import { appError, mapFirebaseError } from '../services/errorCodes'
+import { useAuth } from '../context/AuthContext'
 
 const googleProvider = new GoogleAuthProvider()
 
 export default function RegisterPage() {
+  const { user } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+
+  // Dès que l'auth state passe à "connecté", on laisse React Router rediriger.
+  if (user) return <Navigate to="/" replace />
 
   const handleEmailRegister = async (e) => {
     e.preventDefault()
@@ -28,24 +32,23 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      const { user } = await createUserWithEmailAndPassword(auth, email, password)
+      const { user: newUser } = await createUserWithEmailAndPassword(auth, email, password)
 
       // Créer le workspace de l'admin
-      const workspaceId = user.uid
+      const workspaceId = newUser.uid
       await setDoc(doc(db, 'workspaces', workspaceId), {
-        adminUid: user.uid,
-        memberUids: [user.uid],
+        adminUid: newUser.uid,
+        memberUids: [newUser.uid],
         createdAt: serverTimestamp(),
       })
-      await setDoc(doc(db, 'users', user.uid), {
-        email: user.email,
+      await setDoc(doc(db, 'users', newUser.uid), {
+        email: newUser.email,
         displayName: '',
         workspaceId,
         role: 'admin',
         createdAt: serverTimestamp(),
       })
-
-      navigate('/')
+      // Pas de navigate() — le <Navigate> ci-dessus prend le relais.
     } catch (err) {
       setError(appError(mapFirebaseError(err) ?? 'AUTH-004', err))
     } finally {
@@ -59,7 +62,7 @@ export default function RegisterPage() {
     try {
       // AuthContext gère automatiquement la création du workspace au premier login Google
       await signInWithPopup(auth, googleProvider)
-      navigate('/')
+      // Pas de navigate() — le <Navigate> ci-dessus prend le relais.
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         setError(appError(mapFirebaseError(err) ?? 'AUTH-007', err))

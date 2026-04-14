@@ -15,13 +15,15 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
+        // Définir user immédiatement (synchrone) pour éviter la race condition
+        // avec navigate('/') dans LoginPage/RegisterPage.
+        // ProtectedRoute verra user≠null dès le prochain rendu.
+        setUser(currentUser)
         try {
           const wsId = await getOrCreateWorkspace(currentUser)
-          setUser(currentUser)
           setWorkspaceId(wsId)
           setAuthError(null)
         } catch (err) {
-          setUser(currentUser)
           setWorkspaceId(null)
           setAuthError(
             err.code === 'permission-denied'

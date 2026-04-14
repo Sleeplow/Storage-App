@@ -1,17 +1,22 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { appError, mapFirebaseError } from '../services/errorCodes'
+import { useAuth } from '../context/AuthContext'
 
 const googleProvider = new GoogleAuthProvider()
 
 export default function LoginPage() {
+  const { user } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+
+  // Dès que l'auth state passe à "connecté", on laisse React Router rediriger.
+  // Évite la race condition entre navigate() et onAuthStateChanged.
+  if (user) return <Navigate to="/" replace />
 
   const handleEmailLogin = async (e) => {
     e.preventDefault()
@@ -19,7 +24,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await signInWithEmailAndPassword(auth, email, password)
-      navigate('/')
+      // Pas de navigate() ici — le <Navigate> ci-dessus prend le relais
+      // dès que AuthContext met user à jour.
     } catch (err) {
       setError(appError(mapFirebaseError(err) ?? 'AUTH-003', err))
     } finally {
@@ -32,7 +38,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await signInWithPopup(auth, googleProvider)
-      navigate('/')
+      // Pas de navigate() ici — le <Navigate> ci-dessus prend le relais.
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         setError(appError(mapFirebaseError(err) ?? 'AUTH-007', err))
