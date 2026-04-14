@@ -11,6 +11,21 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="StorageApp" />
     <title>StorageApp</title>
+    <script>
+      // Décode la redirection du 404.html (routing SPA GitHub Pages)
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        var search = location.search;
+        if (search.indexOf('?/') === 0) {
+          var decoded = '/' + search.slice(2).replace(/~and~/g, '&');
+          history.replaceState(null, null, decoded + location.hash);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
