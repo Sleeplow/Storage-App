@@ -14,9 +14,15 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
-// Créer une invitation (code unique basé sur timestamp + random)
+// Génère un code cryptographiquement sûr de 8 caractères
+function generateSecureCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sans 0/O/1/I pour éviter la confusion
+  const bytes = crypto.getRandomValues(new Uint8Array(8))
+  return Array.from(bytes).map((b) => chars[b % chars.length]).join('')
+}
+
 export async function createInvite(workspaceId, invitedByUid) {
-  const code = Math.random().toString(36).slice(2, 8).toUpperCase()
+  const code = generateSecureCode()
   const inviteRef = doc(db, 'invites', code)
   await setDoc(inviteRef, {
     workspaceId,

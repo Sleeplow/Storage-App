@@ -50,8 +50,9 @@ export default function MembersPage() {
       await removeMember(workspaceId, removingMember.uid)
       setRemovingMember(null)
       loadMembers()
-    } catch {
-      // ignorer
+    } catch (err) {
+      console.error('Erreur lors du retrait du membre:', err.message)
+      setRemovingMember(null)
     }
   }
 

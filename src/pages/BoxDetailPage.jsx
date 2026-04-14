@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useBoxes } from '../hooks/useBoxes'
 import { useItems } from '../hooks/useItems'
@@ -11,7 +11,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 export default function BoxDetailPage() {
   const { id: boxId } = useParams()
   const { user, workspaceId } = useAuth()
-  const { boxes } = useBoxes(workspaceId)
+  const { boxes, loading: boxesLoading } = useBoxes(workspaceId)
   const { items, loading } = useItems(workspaceId, boxId)
 
   const [showForm, setShowForm] = useState(false)
@@ -21,6 +21,11 @@ export default function BoxDetailPage() {
   const [deleting, setDeleting] = useState(false)
 
   const box = boxes.find((b) => b.id === boxId)
+
+  // Redirection si la boîte n'existe pas dans ce workspace
+  if (!boxesLoading && boxes.length > 0 && !box) {
+    return <Navigate to="/" replace />
+  }
 
   const handleCreate = async (data) => {
     setSaving(true)

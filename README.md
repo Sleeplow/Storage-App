@@ -77,33 +77,85 @@ Dans la [Firebase Console](https://console.firebase.google.com) :
 2. **Firestore Database** → Créer (mode test pour débuter)
 3. Ajouter votre domaine Vercel dans Authentication → Domaines autorisés
 
-### Règles Firestore (production)
+### Règles Firestore (production — renforcées)
 
-Remplacez les règles de test par :
+Copiez ces règles dans Firebase Console → Firestore → Règles :
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helpers
+    function isMember(workspaceId) {
+      return request.auth.uid in
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.memberUids;
+    }
+    function isAdmin(workspaceId) {
+      return request.auth.uid ==
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.adminUid;
+    }
+
+    // Profils utilisateurs : accès au seul propriétaire
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
     }
+
+    // Workspaces
     match /workspaces/{workspaceId} {
-      allow read, write: if request.auth.uid in resource.data.memberUids;
-      allow create: if request.auth != null;
+      allow read: if isMember(workspaceId);
+      allow create: if request.auth != null
+        && request.resource.data.adminUid == request.auth.uid
+        && request.resource.data.memberUids.hasOnly([request.auth.uid]);
+      // Seul l'admin peut modifier les membres
+      allow update: if isAdmin(workspaceId);
+
+      // Boîtes : membres en lecture/écriture, validation longueur du nom
       match /boxes/{boxId} {
-        allow read, write: if request.auth.uid in
-          get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.memberUids;
+        allow read: if isMember(workspaceId);
+        allow create: if isMember(workspaceId)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 60;
+        allow update: if isMember(workspaceId)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 60;
+        allow delete: if isMember(workspaceId);
+
+        // Éléments (items) — avec workspaceId pour collectionGroup search
         match /items/{itemId} {
-          allow read, write: if request.auth.uid in
-            get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.memberUids;
+          allow read: if isMember(workspaceId);
+          allow create: if isMember(workspaceId)
+            && request.resource.data.name is string
+            && request.resource.data.name.size() > 0
+            && request.resource.data.name.size() <= 80
+            && request.resource.data.workspaceId == workspaceId;
+          allow update: if isMember(workspaceId)
+            && request.resource.data.name is string
+            && request.resource.data.name.size() > 0
+            && request.resource.data.name.size() <= 80;
+          allow delete: if isMember(workspaceId);
         }
       }
     }
+
+    // Support collectionGroup pour la recherche globale
+    match /{path=**}/items/{itemId} {
+      allow read: if request.auth != null
+        && isMember(resource.data.workspaceId);
+    }
+
+    // Invitations — création admin uniquement, expiration côté serveur
     match /invites/{code} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
+      allow read: if request.auth != null
+        && resource.data.expiresAt > request.time;
+      allow create: if request.auth != null
+        && isAdmin(request.resource.data.workspaceId)
+        && request.resource.data.used == false;
+      allow update: if request.auth != null
+        && resource.data.used == false
+        && resource.data.expiresAt > request.time;
     }
   }
 }

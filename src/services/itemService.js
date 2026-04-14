@@ -1,13 +1,14 @@
 import {
   collection,
   doc,
-  addDoc,
   updateDoc,
   deleteDoc,
   query,
   orderBy,
   serverTimestamp,
   increment,
+  writeBatch,
+  collection as col,
 } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -19,18 +20,25 @@ function boxRef(workspaceId, boxId) {
   return doc(db, 'workspaces', workspaceId, 'boxes', boxId)
 }
 
+// Création atomique : item + itemCount en un seul batch
 export async function createItem(workspaceId, boxId, { name, description, photoUrl, photoPublicId }, userId) {
-  const docRef = await addDoc(itemsRef(workspaceId, boxId), {
+  const batch = writeBatch(db)
+
+  const newItemRef = doc(itemsRef(workspaceId, boxId))
+  batch.set(newItemRef, {
     name: name.trim(),
     description: description?.trim() || '',
     photoUrl: photoUrl || '',
     photoPublicId: photoPublicId || '',
+    workspaceId, // nécessaire pour le filtrage collectionGroup dans la recherche
     createdAt: serverTimestamp(),
     createdBy: userId,
   })
-  // Incrémenter le compteur d'éléments de la boîte
-  await updateDoc(boxRef(workspaceId, boxId), { itemCount: increment(1) })
-  return docRef.id
+
+  batch.update(boxRef(workspaceId, boxId), { itemCount: increment(1) })
+
+  await batch.commit()
+  return newItemRef.id
 }
 
 export async function updateItem(workspaceId, boxId, itemId, { name, description, photoUrl, photoPublicId }) {
@@ -40,13 +48,16 @@ export async function updateItem(workspaceId, boxId, itemId, { name, description
   }
   if (photoUrl !== undefined) updates.photoUrl = photoUrl
   if (photoPublicId !== undefined) updates.photoPublicId = photoPublicId
+
   await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId), updates)
 }
 
+// Suppression atomique : item + itemCount en un seul batch
 export async function deleteItem(workspaceId, boxId, itemId) {
-  await deleteDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId))
-  // Décrémenter le compteur d'éléments de la boîte
-  await updateDoc(boxRef(workspaceId, boxId), { itemCount: increment(-1) })
+  const batch = writeBatch(db)
+  batch.delete(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId))
+  batch.update(boxRef(workspaceId, boxId), { itemCount: increment(-1) })
+  await batch.commit()
 }
 
 export function getItemsQuery(workspaceId, boxId) {
