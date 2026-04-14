@@ -31,6 +31,9 @@
 body {
   min-height: 100vh;
   min-height: 100dvh;
+  /* Safe area pour iPhone avec encoche/Dynamic Island */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 #root {
