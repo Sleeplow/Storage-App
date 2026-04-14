@@ -1,17 +1,17 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { signOut } from 'firebase/auth'
-import { auth } from '../services/firebase'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../hooks/useTheme'
 import SearchBar from './SearchBar'
+import SettingsPanel from './SettingsPanel'
+
 
 export default function Layout({ children }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [theme, setTheme] = useTheme()
 
-  const handleLogout = async () => {
-    await signOut(auth)
-    navigate('/login')
-  }
+  const displayName = user?.displayName || user?.email || '?'
 
   return (
     <div className="app-layout">
@@ -21,17 +21,36 @@ export default function Layout({ children }) {
         </Link>
         <SearchBar />
         <nav className="app-nav">
-          <Link to="/members" className="btn btn-ghost btn-nav">
+          <Link to="/members" className="btn btn-ghost btn-nav" aria-label="Membres">
             👥
           </Link>
-          {user && (
-            <button onClick={handleLogout} className="btn btn-ghost btn-nav">
-              ⎋
-            </button>
-          )}
+          <button
+            className="nav-avatar-btn"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Paramètres"
+          >
+            {user?.photoURL ? (
+              <img
+                src={user.photoURL}
+                className="nav-avatar"
+                alt=""
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="nav-avatar-fallback">
+                {displayName[0].toUpperCase()}
+              </div>
+            )}
+          </button>
         </nav>
       </header>
       <main className="app-main">{children}</main>
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        theme={theme}
+        setTheme={setTheme}
+      />
     </div>
   )
 }
