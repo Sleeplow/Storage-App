@@ -8,13 +8,6 @@ import ItemCard from '../components/ItemCard'
 import ItemForm from '../components/ItemForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 
-function getFirebaseErrorMessage(err) {
-  if (err?.code === 'permission-denied') return 'Action non autorisée.'
-  if (err?.code === 'not-found') return 'Élément introuvable — il a peut-être été supprimé.'
-  if (err?.code === 'resource-exhausted') return 'Quota dépassé. Réessayez plus tard.'
-  return 'Une erreur est survenue. Réessayez.'
-}
-
 export default function BoxDetailPage() {
   const { id: boxId } = useParams()
   const { user, workspaceId } = useAuth()
@@ -43,11 +36,10 @@ export default function BoxDetailPage() {
       await createItem(workspaceId, boxId, data, user.uid)
       setShowForm(false)
     } catch (err) {
-      if (err?.code === 'not-found' || err?.code === 'permission-denied') {
-        setOpError('Cette boîte a été supprimée.')
+      setOpError(err.message)
+      // ITEM-002 = create failed (box likely deleted) → redirect home
+      if (err.message?.includes('ERR-ITEM-002')) {
         setTimeout(() => navigate('/'), 1500)
-      } else {
-        setOpError(getFirebaseErrorMessage(err))
       }
     } finally {
       setSaving(false)
@@ -61,7 +53,7 @@ export default function BoxDetailPage() {
       await updateItem(workspaceId, boxId, editingItem.id, data)
       setEditingItem(null)
     } catch (err) {
-      setOpError(getFirebaseErrorMessage(err))
+      setOpError(err.message)
     } finally {
       setSaving(false)
     }
@@ -74,7 +66,7 @@ export default function BoxDetailPage() {
       await deleteItem(workspaceId, boxId, deletingItem.id)
       setDeletingItem(null)
     } catch (err) {
-      setOpError(getFirebaseErrorMessage(err))
+      setOpError(err.message)
       setDeletingItem(null)
     } finally {
       setDeleting(false)

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { onSnapshot } from 'firebase/firestore'
 import { getItemsQuery } from '../services/itemService'
+import { appError } from '../services/errorCodes'
 
 export function useItems(workspaceId, boxId) {
   const [items, setItems] = useState([])
@@ -18,8 +19,7 @@ export function useItems(workspaceId, boxId) {
         setLoading(false)
       },
       (err) => {
-        console.error('useItems error:', err.message)
-        setError(err)
+        setError(new Error(appError('ITEM-001', err)))
         setLoading(false)
       }
     )

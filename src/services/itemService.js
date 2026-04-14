@@ -8,9 +8,9 @@ import {
   serverTimestamp,
   increment,
   writeBatch,
-  collection as col,
 } from 'firebase/firestore'
 import { db } from './firebase'
+import { appError } from './errorCodes'
 
 function itemsRef(workspaceId, boxId) {
   return collection(db, 'workspaces', workspaceId, 'boxes', boxId, 'items')
@@ -22,42 +22,54 @@ function boxRef(workspaceId, boxId) {
 
 // Création atomique : item + itemCount en un seul batch
 export async function createItem(workspaceId, boxId, { name, description, photoUrl, photoPublicId }, userId) {
-  const batch = writeBatch(db)
+  try {
+    const batch = writeBatch(db)
 
-  const newItemRef = doc(itemsRef(workspaceId, boxId))
-  batch.set(newItemRef, {
-    name: name.trim(),
-    description: description?.trim() || '',
-    photoUrl: photoUrl || '',
-    photoPublicId: photoPublicId || '',
-    workspaceId, // nécessaire pour le filtrage collectionGroup dans la recherche
-    createdAt: serverTimestamp(),
-    createdBy: userId,
-  })
+    const newItemRef = doc(itemsRef(workspaceId, boxId))
+    batch.set(newItemRef, {
+      name: name.trim(),
+      description: description?.trim() || '',
+      photoUrl: photoUrl || '',
+      photoPublicId: photoPublicId || '',
+      workspaceId, // nécessaire pour le filtrage collectionGroup dans la recherche
+      createdAt: serverTimestamp(),
+      createdBy: userId,
+    })
 
-  batch.update(boxRef(workspaceId, boxId), { itemCount: increment(1) })
+    batch.update(boxRef(workspaceId, boxId), { itemCount: increment(1) })
 
-  await batch.commit()
-  return newItemRef.id
+    await batch.commit()
+    return newItemRef.id
+  } catch (err) {
+    throw new Error(appError('ITEM-002', err))
+  }
 }
 
 export async function updateItem(workspaceId, boxId, itemId, { name, description, photoUrl, photoPublicId }) {
-  const updates = {
-    name: name.trim(),
-    description: description?.trim() || '',
-  }
-  if (photoUrl !== undefined) updates.photoUrl = photoUrl
-  if (photoPublicId !== undefined) updates.photoPublicId = photoPublicId
+  try {
+    const updates = {
+      name: name.trim(),
+      description: description?.trim() || '',
+    }
+    if (photoUrl !== undefined) updates.photoUrl = photoUrl
+    if (photoPublicId !== undefined) updates.photoPublicId = photoPublicId
 
-  await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId), updates)
+    await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId), updates)
+  } catch (err) {
+    throw new Error(appError('ITEM-003', err))
+  }
 }
 
 // Suppression atomique : item + itemCount en un seul batch
 export async function deleteItem(workspaceId, boxId, itemId) {
-  const batch = writeBatch(db)
-  batch.delete(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId))
-  batch.update(boxRef(workspaceId, boxId), { itemCount: increment(-1) })
-  await batch.commit()
+  try {
+    const batch = writeBatch(db)
+    batch.delete(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId))
+    batch.update(boxRef(workspaceId, boxId), { itemCount: increment(-1) })
+    await batch.commit()
+  } catch (err) {
+    throw new Error(appError('ITEM-004', err))
+  }
 }
 
 export function getItemsQuery(workspaceId, boxId) {

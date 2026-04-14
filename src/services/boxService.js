@@ -10,6 +10,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
+import { appError } from './errorCodes'
 
 function boxesRef(workspaceId) {
   return collection(db, 'workspaces', workspaceId, 'boxes')
@@ -24,30 +25,42 @@ async function getNextBoxNumber(workspaceId) {
 }
 
 export async function createBox(workspaceId, { name }, userId) {
-  const number = await getNextBoxNumber(workspaceId)
-  const docRef = await addDoc(boxesRef(workspaceId), {
-    number,
-    name: name.trim(),
-    itemCount: 0,
-    createdAt: serverTimestamp(),
-    createdBy: userId,
-  })
-  return docRef.id
+  try {
+    const number = await getNextBoxNumber(workspaceId)
+    const docRef = await addDoc(boxesRef(workspaceId), {
+      number,
+      name: name.trim(),
+      itemCount: 0,
+      createdAt: serverTimestamp(),
+      createdBy: userId,
+    })
+    return docRef.id
+  } catch (err) {
+    throw new Error(appError('BOX-002', err))
+  }
 }
 
 export async function updateBox(workspaceId, boxId, { name }) {
-  await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId), {
-    name: name.trim(),
-  })
+  try {
+    await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId), {
+      name: name.trim(),
+    })
+  } catch (err) {
+    throw new Error(appError('BOX-003', err))
+  }
 }
 
 export async function deleteBox(workspaceId, boxId) {
-  // Supprimer tous les éléments de la boîte avant de la supprimer
-  const itemsRef = collection(db, 'workspaces', workspaceId, 'boxes', boxId, 'items')
-  const itemsSnap = await getDocs(itemsRef)
-  const deletions = itemsSnap.docs.map((d) => deleteDoc(d.ref))
-  await Promise.all(deletions)
-  await deleteDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId))
+  try {
+    // Supprimer tous les éléments de la boîte avant de la supprimer
+    const itemsRef = collection(db, 'workspaces', workspaceId, 'boxes', boxId, 'items')
+    const itemsSnap = await getDocs(itemsRef)
+    const deletions = itemsSnap.docs.map((d) => deleteDoc(d.ref))
+    await Promise.all(deletions)
+    await deleteDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId))
+  } catch (err) {
+    throw new Error(appError('BOX-004', err))
+  }
 }
 
 export function getBoxesQuery(workspaceId) {

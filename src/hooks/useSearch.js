@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { collectionGroup, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '../services/firebase'
+import { appError } from '../services/errorCodes'
 
 // Abonnement temps réel sur tous les items du workspace via collectionGroup filtré côté serveur
 export function useSearch(workspaceId) {
@@ -17,15 +18,22 @@ export function useSearch(workspaceId) {
       where('workspaceId', '==', workspaceId)
     )
 
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const items = snap.docs.map((d) => {
-        const pathParts = d.ref.path.split('/')
-        const boxId = pathParts[3]
-        return { id: d.id, boxId, ...d.data() }
-      })
-      setAllItems(items)
-      setLoadingSearch(false)
-    })
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const items = snap.docs.map((d) => {
+          const pathParts = d.ref.path.split('/')
+          const boxId = pathParts[3]
+          return { id: d.id, boxId, ...d.data() }
+        })
+        setAllItems(items)
+        setLoadingSearch(false)
+      },
+      (err) => {
+        appError('SEARCH-001', err)
+        setLoadingSearch(false)
+      }
+    )
 
     return unsubscribe
   }, [workspaceId])

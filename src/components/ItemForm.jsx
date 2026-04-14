@@ -56,7 +56,7 @@ export default function ItemForm({ initial = null, onSubmit, onClose, loading })
 
       await onSubmit({ name, description, photoUrl, photoPublicId })
     } catch (err) {
-      setUploadError('Erreur lors de l\'upload de la photo. Réessayez.')
+      setUploadError(err.message)
     } finally {
       setUploading(false)
     }

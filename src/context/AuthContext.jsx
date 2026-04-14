@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
+import { appError } from '../services/errorCodes'
 
 const AuthContext = createContext(null)
 
@@ -20,13 +21,12 @@ export function AuthProvider({ children }) {
           setWorkspaceId(wsId)
           setAuthError(null)
         } catch (err) {
-          console.error('Workspace init failed:', err.code)
           setUser(currentUser)
           setWorkspaceId(null)
           setAuthError(
             err.code === 'permission-denied'
-              ? 'Accès à votre espace refusé. Contactez l\'admin.'
-              : 'Erreur de connexion au serveur. Rechargez la page.'
+              ? appError('AUTH-002', err)
+              : appError('AUTH-008', err)
           )
         }
       } else {

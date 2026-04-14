@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '../services/firebase'
+import { appError, mapFirebaseError } from '../services/errorCodes'
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password)
       navigate('/')
     } catch (err) {
-      setError(getErrorMessage(err.code))
+      setError(appError(mapFirebaseError(err) ?? 'AUTH-003', err))
     } finally {
       setLoading(false)
     }
@@ -33,8 +34,8 @@ export default function LoginPage() {
       await signInWithPopup(auth, googleProvider)
       navigate('/')
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError(getErrorMessage(err.code))
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError(appError(mapFirebaseError(err) ?? 'AUTH-007', err))
       }
     } finally {
       setLoading(false)
@@ -112,17 +113,3 @@ function GoogleIcon() {
   )
 }
 
-function getErrorMessage(code) {
-  switch (code) {
-    case 'auth/invalid-email':
-      return 'Adresse email invalide.'
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
-      return 'Email ou mot de passe incorrect.'
-    case 'auth/too-many-requests':
-      return 'Trop de tentatives. Réessayez plus tard.'
-    default:
-      return 'Une erreur est survenue. Réessayez.'
-  }
-}

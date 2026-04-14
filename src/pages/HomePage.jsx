@@ -15,14 +15,18 @@ export default function HomePage() {
   const [deletingBox, setDeletingBox] = useState(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [opError, setOpError] = useState('')
 
   const nextNumber = boxes.length > 0 ? Math.max(...boxes.map((b) => b.number)) + 1 : 1
 
   const handleCreate = async ({ name }) => {
     setSaving(true)
+    setOpError('')
     try {
       await createBox(workspaceId, { name }, user.uid)
       setShowForm(false)
+    } catch (err) {
+      setOpError(err.message)
     } finally {
       setSaving(false)
     }
@@ -30,9 +34,12 @@ export default function HomePage() {
 
   const handleEdit = async ({ name }) => {
     setSaving(true)
+    setOpError('')
     try {
       await updateBox(workspaceId, editingBox.id, { name })
       setEditingBox(null)
+    } catch (err) {
+      setOpError(err.message)
     } finally {
       setSaving(false)
     }
@@ -40,8 +47,12 @@ export default function HomePage() {
 
   const handleDelete = async () => {
     setDeleting(true)
+    setOpError('')
     try {
       await deleteBox(workspaceId, deletingBox.id)
+      setDeletingBox(null)
+    } catch (err) {
+      setOpError(err.message)
       setDeletingBox(null)
     } finally {
       setDeleting(false)
@@ -50,6 +61,7 @@ export default function HomePage() {
 
   return (
     <div className="page">
+      {opError && <p className="error-message" style={{ marginBottom: '1rem' }}>{opError}</p>}
       <div className="page-header">
         <h2>Mes boîtes</h2>
         <button className="btn btn-primary btn-new" onClick={() => setShowForm(true)}>
