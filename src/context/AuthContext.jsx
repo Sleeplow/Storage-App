@@ -9,17 +9,30 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [workspaceId, setWorkspaceId] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Récupérer ou créer le workspace de l'utilisateur
-        const wsId = await getOrCreateWorkspace(currentUser)
-        setUser(currentUser)
-        setWorkspaceId(wsId)
+        try {
+          const wsId = await getOrCreateWorkspace(currentUser)
+          setUser(currentUser)
+          setWorkspaceId(wsId)
+          setAuthError(null)
+        } catch (err) {
+          console.error('Workspace init failed:', err.code)
+          setUser(currentUser)
+          setWorkspaceId(null)
+          setAuthError(
+            err.code === 'permission-denied'
+              ? 'Accès à votre espace refusé. Contactez l\'admin.'
+              : 'Erreur de connexion au serveur. Rechargez la page.'
+          )
+        }
       } else {
         setUser(null)
         setWorkspaceId(null)
+        setAuthError(null)
       }
       setLoading(false)
     })
@@ -27,13 +40,12 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, workspaceId, loading }}>
+    <AuthContext.Provider value={{ user, workspaceId, loading, authError }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-// Récupère le workspaceId existant, ou crée un workspace pour les nouveaux utilisateurs Google
 async function getOrCreateWorkspace(user) {
   const userRef = doc(db, 'users', user.uid)
   const userSnap = await getDoc(userRef)

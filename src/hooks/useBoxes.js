@@ -8,8 +8,13 @@ export function useBoxes(workspaceId) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!workspaceId) return
+    if (!workspaceId) {
+      setBoxes([])
+      setLoading(false)
+      return
+    }
 
+    setLoading(true)
     const q = getBoxesQuery(workspaceId)
     const unsubscribe = onSnapshot(
       q,

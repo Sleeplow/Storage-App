@@ -1,13 +1,9 @@
 import {
   doc,
   getDoc,
-  getDocs,
   setDoc,
   updateDoc,
-  deleteDoc,
-  collection,
-  query,
-  where,
+  runTransaction,
   serverTimestamp,
   arrayUnion,
   arrayRemove,
@@ -23,8 +19,7 @@ function generateSecureCode() {
 
 export async function createInvite(workspaceId, invitedByUid) {
   const code = generateSecureCode()
-  const inviteRef = doc(db, 'invites', code)
-  await setDoc(inviteRef, {
+  await setDoc(doc(db, 'invites', code), {
     workspaceId,
     invitedBy: invitedByUid,
     createdAt: serverTimestamp(),
@@ -34,44 +29,42 @@ export async function createInvite(workspaceId, invitedByUid) {
   return code
 }
 
-// Rejoindre un workspace via un code d'invitation
+// Rejoindre un workspace via code — transaction atomique pour éviter double utilisation
 export async function joinWithCode(code, user) {
   const inviteRef = doc(db, 'invites', code.toUpperCase())
-  const inviteSnap = await getDoc(inviteRef)
+  const userRef = doc(db, 'users', user.uid)
 
-  if (!inviteSnap.exists()) throw new Error('Code d\'invitation invalide.')
+  return await runTransaction(db, async (transaction) => {
+    const inviteSnap = await transaction.get(inviteRef)
+    if (!inviteSnap.exists()) throw new Error('Code d\'invitation invalide.')
 
-  const invite = inviteSnap.data()
-  if (invite.used) throw new Error('Ce code d\'invitation a déjà été utilisé.')
-  if (invite.expiresAt.toDate() < new Date()) throw new Error('Ce code d\'invitation a expiré.')
+    const invite = inviteSnap.data()
+    if (invite.used) throw new Error('Ce code d\'invitation a déjà été utilisé.')
+    if (invite.expiresAt.toDate() < new Date()) throw new Error('Ce code d\'invitation a expiré.')
 
-  const workspaceRef = doc(db, 'workspaces', invite.workspaceId)
-  const wsSnap = await getDoc(workspaceRef)
-  if (!wsSnap.exists()) throw new Error('Espace introuvable.')
+    const workspaceRef = doc(db, 'workspaces', invite.workspaceId)
+    const wsSnap = await transaction.get(workspaceRef)
+    if (!wsSnap.exists()) throw new Error('Espace introuvable.')
 
-  const ws = wsSnap.data()
-  if (ws.memberUids.length >= 5) throw new Error('L\'espace a atteint la limite de 5 membres.')
-  if (ws.memberUids.includes(user.uid)) throw new Error('Vous êtes déjà membre de cet espace.')
+    const ws = wsSnap.data()
+    if (ws.memberUids.length >= 5) throw new Error('L\'espace a atteint la limite de 5 membres.')
+    if (ws.memberUids.includes(user.uid)) throw new Error('Vous êtes déjà membre de cet espace.')
 
-  // Ajouter l'utilisateur au workspace
-  await updateDoc(workspaceRef, { memberUids: arrayUnion(user.uid) })
+    // Tout atomique : marquer utilisé + ajouter membre
+    transaction.update(inviteRef, { used: true, usedBy: user.uid })
+    transaction.update(workspaceRef, { memberUids: arrayUnion(user.uid) })
+    transaction.set(userRef, {
+      email: user.email,
+      displayName: user.displayName || '',
+      workspaceId: invite.workspaceId,
+      role: 'member',
+      createdAt: serverTimestamp(),
+    }, { merge: true })
 
-  // Mettre à jour le profil utilisateur
-  await setDoc(doc(db, 'users', user.uid), {
-    email: user.email,
-    displayName: user.displayName || '',
-    workspaceId: invite.workspaceId,
-    role: 'member',
-    createdAt: serverTimestamp(),
-  }, { merge: true })
-
-  // Marquer l'invitation comme utilisée
-  await updateDoc(inviteRef, { used: true, usedBy: user.uid })
-
-  return invite.workspaceId
+    return invite.workspaceId
+  })
 }
 
-// Récupérer les membres d'un workspace
 export async function getWorkspaceMembers(workspaceId) {
   const wsSnap = await getDoc(doc(db, 'workspaces', workspaceId))
   if (!wsSnap.exists()) return []
@@ -86,7 +79,6 @@ export async function getWorkspaceMembers(workspaceId) {
   return members
 }
 
-// Retirer un membre (admin seulement)
 export async function removeMember(workspaceId, memberUid) {
   await updateDoc(doc(db, 'workspaces', workspaceId), {
     memberUids: arrayRemove(memberUid),

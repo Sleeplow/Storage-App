@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useBoxes } from '../hooks/useBoxes'
 import { useItems } from '../hooks/useItems'
@@ -8,17 +8,26 @@ import ItemCard from '../components/ItemCard'
 import ItemForm from '../components/ItemForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 
+function getFirebaseErrorMessage(err) {
+  if (err?.code === 'permission-denied') return 'Action non autorisée.'
+  if (err?.code === 'not-found') return 'Élément introuvable — il a peut-être été supprimé.'
+  if (err?.code === 'resource-exhausted') return 'Quota dépassé. Réessayez plus tard.'
+  return 'Une erreur est survenue. Réessayez.'
+}
+
 export default function BoxDetailPage() {
   const { id: boxId } = useParams()
   const { user, workspaceId } = useAuth()
   const { boxes, loading: boxesLoading } = useBoxes(workspaceId)
   const { items, loading } = useItems(workspaceId, boxId)
+  const navigate = useNavigate()
 
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deletingItem, setDeletingItem] = useState(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [opError, setOpError] = useState('')
 
   const box = boxes.find((b) => b.id === boxId)
 
@@ -29,9 +38,17 @@ export default function BoxDetailPage() {
 
   const handleCreate = async (data) => {
     setSaving(true)
+    setOpError('')
     try {
       await createItem(workspaceId, boxId, data, user.uid)
       setShowForm(false)
+    } catch (err) {
+      if (err?.code === 'not-found' || err?.code === 'permission-denied') {
+        setOpError('Cette boîte a été supprimée.')
+        setTimeout(() => navigate('/'), 1500)
+      } else {
+        setOpError(getFirebaseErrorMessage(err))
+      }
     } finally {
       setSaving(false)
     }
@@ -39,9 +56,12 @@ export default function BoxDetailPage() {
 
   const handleEdit = async (data) => {
     setSaving(true)
+    setOpError('')
     try {
       await updateItem(workspaceId, boxId, editingItem.id, data)
       setEditingItem(null)
+    } catch (err) {
+      setOpError(getFirebaseErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -49,8 +69,12 @@ export default function BoxDetailPage() {
 
   const handleDelete = async () => {
     setDeleting(true)
+    setOpError('')
     try {
       await deleteItem(workspaceId, boxId, deletingItem.id)
+      setDeletingItem(null)
+    } catch (err) {
+      setOpError(getFirebaseErrorMessage(err))
       setDeletingItem(null)
     } finally {
       setDeleting(false)
@@ -59,6 +83,7 @@ export default function BoxDetailPage() {
 
   return (
     <div className="page">
+      {opError && <p className="error-message" style={{ marginBottom: '1rem' }}>{opError}</p>}
       <div className="page-header">
         <div className="breadcrumb">
           <Link to="/" className="breadcrumb-link">← Boîtes</Link>
