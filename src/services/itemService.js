@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { appError } from './errorCodes'
+import { logAction } from './logger'
 
 function itemsRef(workspaceId, boxId) {
   return collection(db, 'workspaces', workspaceId, 'boxes', boxId, 'items')
@@ -39,6 +40,7 @@ export async function createItem(workspaceId, boxId, { name, description, photoU
     batch.update(boxRef(workspaceId, boxId), { itemCount: increment(1) })
 
     await batch.commit()
+    logAction('item', 'create', name.trim())
     return newItemRef.id
   } catch (err) {
     throw new Error(appError('ITEM-002', err))
@@ -55,6 +57,7 @@ export async function updateItem(workspaceId, boxId, itemId, { name, description
     if (photoPublicId !== undefined) updates.photoPublicId = photoPublicId
 
     await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId), updates)
+    logAction('item', 'update', name.trim())
   } catch (err) {
     throw new Error(appError('ITEM-003', err))
   }
@@ -67,6 +70,7 @@ export async function deleteItem(workspaceId, boxId, itemId) {
     batch.delete(doc(db, 'workspaces', workspaceId, 'boxes', boxId, 'items', itemId))
     batch.update(boxRef(workspaceId, boxId), { itemCount: increment(-1) })
     await batch.commit()
+    logAction('item', 'delete', itemId)
   } catch (err) {
     throw new Error(appError('ITEM-004', err))
   }

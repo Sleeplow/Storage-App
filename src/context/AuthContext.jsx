@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
 import { appError } from '../services/errorCodes'
+import { logAction } from '../services/logger'
 
 const AuthContext = createContext(null)
 
@@ -15,14 +16,13 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Définir user immédiatement (synchrone) pour éviter la race condition
-        // avec navigate('/') dans LoginPage/RegisterPage.
-        // ProtectedRoute verra user≠null dès le prochain rendu.
         setUser(currentUser)
+        logAction('auth', 'login', currentUser.email)
         try {
           const wsId = await getOrCreateWorkspace(currentUser)
           setWorkspaceId(wsId)
           setAuthError(null)
+          logAction('auth', 'workspace-loaded', wsId)
         } catch (err) {
           setWorkspaceId(null)
           setAuthError(
@@ -32,6 +32,7 @@ export function AuthProvider({ children }) {
           )
         }
       } else {
+        if (user) logAction('auth', 'logout', user?.email ?? '')
         setUser(null)
         setWorkspaceId(null)
         setAuthError(null)
@@ -39,7 +40,7 @@ export function AuthProvider({ children }) {
       setLoading(false)
     })
     return unsubscribe
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AuthContext.Provider value={{ user, workspaceId, loading, authError }}>
@@ -70,7 +71,7 @@ async function getOrCreateWorkspace(user) {
     role: 'admin',
     createdAt: serverTimestamp(),
   })
-
+  logAction('auth', 'workspace-created', workspaceId)
   return workspaceId
 }
 

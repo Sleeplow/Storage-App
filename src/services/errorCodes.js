@@ -1,3 +1,5 @@
+import { logAction } from './logger.js'
+
 // ─── Error Code Registry ───────────────────────────────────────────────────
 // Each code maps to a French user-facing message.
 // To find a specific error in the code, search for its tag, e.g. [ERR-AUTH-001]
@@ -77,7 +79,10 @@ export function appError(code, originalError) {
     console.error(tag)
   }
   const message = ERROR_MESSAGES[code] ?? 'Une erreur inattendue est survenue.'
-  return `${message} (ERR-${code})`
+  const userMessage = `${message} (ERR-${code})`
+
+  logAction('error', code, originalError?.message ?? originalError?.code ?? '')
+  return userMessage
 }
 
 /**
