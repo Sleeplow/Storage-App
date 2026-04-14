@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { useAuth } from '../context/AuthContext'
+import SearchBar from './SearchBar'
 
 export default function Layout({ children }) {
   const { user } = useAuth()
@@ -16,12 +17,13 @@ export default function Layout({ children }) {
     <div className="app-layout">
       <header className="app-header">
         <Link to="/" className="app-logo">
-          StorageApp
+          📦 StorageApp
         </Link>
+        <SearchBar />
         <nav className="app-nav">
           {user && (
             <button onClick={handleLogout} className="btn btn-ghost">
-              Déconnexion
+              Quitter
             </button>
           )}
         </nav>
