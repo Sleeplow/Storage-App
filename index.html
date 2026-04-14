@@ -2,6 +2,22 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com;
+      connect-src 'self'
+        https://*.googleapis.com
+        https://*.firebaseio.com
+        https://*.firebaseapp.com
+        https://api.cloudinary.com
+        https://identitytoolkit.googleapis.com
+        wss://*.firebaseio.com;
+      img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com;
+      frame-src https://accounts.google.com https://*.firebaseapp.com;
+      style-src 'self' 'unsafe-inline';
+      font-src 'self' data:;
+    " />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <link rel="icon" type="image/png" href="/pwa-192x192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -26,7 +42,7 @@
         }
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-D-VQrtql.js"></script>
+    <script type="module" crossorigin src="/assets/index-D-VWFvD0.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BCCq-o_7.css">
   <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
