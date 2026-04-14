@@ -20,7 +20,7 @@ npm install --legacy-peer-deps
 
 > `--legacy-peer-deps` est requis à cause de vite-plugin-pwa qui n'est pas encore compatible avec Vite 8.
 
-### 2. Configurer les variables d'environnement
+### 2. Variables d'environnement
 
 Créez un fichier `.env.local` à la racine (jamais commité dans git) :
 
@@ -39,7 +39,7 @@ VITE_CLOUDINARY_UPLOAD_PRESET=...
 Les valeurs Firebase se trouvent dans : Firebase Console → Paramètres du projet → Vos applications.
 Pour Cloudinary : utilisez uniquement le **Cloud Name** et le **Upload Preset non signé** — ne jamais mettre l'API Secret dans le frontend.
 
-### 3. Lancer le serveur de développement
+### 3. Démarrer le serveur de développement
 
 ```bash
 npm run dev
@@ -81,9 +81,9 @@ GitHub Pages ne gère pas nativement le routing côté client. La solution utili
 
 Dans la [Firebase Console](https://console.firebase.google.com) :
 
-1. **Authentication** → Méthode de connexion → Activer **Email/Mot de passe** et **Google**
+1. **Authentication** → Méthode de connexion → Activer **Google** uniquement (l'auth email/mot de passe est désactivée dans l'app)
 2. **Firestore Database** → Créer en mode production
-3. **Authentication → Domaines autorisés** → Ajouter `storage.sleeplow.ca`
+3. **Authentication → Domaines autorisés** → Ajouter `storage.sleeplow.ca` et `localhost`
 
 ### Règles Firestore (v3 — production)
 
@@ -159,6 +159,23 @@ service cloud.firestore {
 
 ---
 
+## Logger de session
+
+`src/services/logger.js` maintient un journal en mémoire (réinitialisé à chaque rechargement) des actions de l'utilisateur et des erreurs.
+
+```js
+import { logAction } from './services/logger'
+
+logAction('box', 'create', 'Décorations Noël')  // category, action, detail
+logAction('error', 'BOX-002', 'permission-denied')
+```
+
+Le journal est utilisé par la fonctionnalité **Rapporter un bug** (Paramètres → Support) pour pré-remplir un courriel avec le contexte complet de la session.
+
+Toutes les erreurs via `appError()` sont automatiquement enregistrées. Les services `boxService`, `itemService` et `AuthContext` enregistrent aussi les opérations réussies.
+
+---
+
 ## Système de codes d'erreur
 
 Toutes les erreurs de l'application sont tracées via `src/services/errorCodes.js`.
@@ -206,31 +223,34 @@ try {
 ```
 src/
 ├── components/
-│   ├── Layout.jsx          # Header + navigation
+│   ├── Layout.jsx          # Header + avatar Google → SettingsPanel
+│   ├── SettingsPanel.jsx   # Drawer paramètres (compte, stats, thème, bug report)
 │   ├── ProtectedRoute.jsx  # Garde de route authentifiée
 │   ├── SearchBar.jsx       # Recherche globale temps réel
 │   ├── BoxCard.jsx         # Carte d'une boîte
 │   ├── BoxForm.jsx         # Modal créer/modifier boîte
 │   ├── ItemCard.jsx        # Carte d'un élément
 │   ├── ItemForm.jsx        # Modal créer/modifier élément + photo
-│   └── ConfirmDialog.jsx   # Dialog de confirmation
+│   └── ConfirmDialog.jsx   # Dialog de confirmation générique
 ├── context/
 │   └── AuthContext.jsx     # Session utilisateur + workspaceId + authError
 ├── hooks/
 │   ├── useBoxes.js         # Abonnement temps réel boîtes
 │   ├── useItems.js         # Abonnement temps réel éléments
-│   └── useSearch.js        # Recherche globale (collectionGroup)
+│   ├── useSearch.js        # Recherche globale (collectionGroup)
+│   └── useTheme.js         # Préférence light/dark/system (localStorage)
 ├── pages/
-│   ├── LoginPage.jsx
-│   ├── RegisterPage.jsx
+│   ├── LoginPage.jsx       # Google Sign-In uniquement
+│   ├── RegisterPage.jsx    # Redirige vers /login
 │   ├── HomePage.jsx        # Liste des boîtes
 │   ├── BoxDetailPage.jsx   # Éléments d'une boîte
-│   ├── MembersPage.jsx     # Gestion des membres
+│   ├── MembersPage.jsx     # Gestion des membres + invitation
 │   ├── JoinPage.jsx        # Rejoindre via code d'invitation
 │   └── NotFoundPage.jsx
 └── services/
     ├── firebase.js             # Initialisation Firebase
     ├── errorCodes.js           # Registre ERR-XXX + helper appError()
+    ├── logger.js               # Journal de session en mémoire (bug reports)
     ├── boxService.js           # CRUD boîtes (Firestore)
     ├── itemService.js          # CRUD éléments (writeBatch atomique)
     ├── cloudinaryService.js    # Upload/validation photos
@@ -262,11 +282,15 @@ invites/{code}
 
 | Sujet | Choix | Raison |
 |-------|-------|--------|
+| Authentification | Google Sign-In uniquement | UX simplifiée, pas de gestion de mots de passe |
+| Dark mode | `data-theme` sur `<html>` + CSS custom props | Pas de JS au runtime pour les couleurs, flip instantané |
+| Thème initial | Script dans `main.jsx` avant `createRoot` | Évite le flash de thème au chargement |
 | Photos | Cloudinary (upload preset non signé) | Firebase Storage nécessite Blaze (payant) |
 | itemCount | `writeBatch` atomique | Évite les race conditions sur le compteur |
 | Rejoindre un espace | `runTransaction` | Empêche la double utilisation d'un code d'invitation |
 | Recherche | `collectionGroup` + `where('workspaceId')` | Filtre côté serveur — défense en profondeur |
 | Routing SPA | `public/404.html` redirect trick | GitHub Pages ne supporte pas le routing côté client |
 | Codes d'invitation | `crypto.getRandomValues` | Évite Math.random() qui n'est pas cryptographiquement sûr |
+| Logger de session | Module-level array (mémoire) | Pas de stockage persistant — données effacées à la fermeture |
 </content>
 </invoke>

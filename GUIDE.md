@@ -6,50 +6,35 @@ StorageApp vous permet de gérer l'inventaire de vos boîtes de rangement en fam
 
 ## Table des matières
 
-1. [Créer un compte](#1-créer-un-compte)
-2. [Se connecter](#2-se-connecter)
-3. [Créer une boîte](#3-créer-une-boîte)
-4. [Ajouter un objet dans une boîte](#4-ajouter-un-objet-dans-une-boîte)
-5. [Modifier ou supprimer un objet](#5-modifier-ou-supprimer-un-objet)
-6. [Modifier ou supprimer une boîte](#6-modifier-ou-supprimer-une-boîte)
-7. [Rechercher un objet](#7-rechercher-un-objet)
-8. [Inviter un membre de la famille](#8-inviter-un-membre-de-la-famille)
-9. [Rejoindre l'espace d'un proche](#9-rejoindre-lespace-dun-proche)
-10. [Gérer les membres](#10-gérer-les-membres)
+1. [Se connecter](#1-se-connecter)
+2. [Créer une boîte](#2-créer-une-boîte)
+3. [Ajouter un objet dans une boîte](#3-ajouter-un-objet-dans-une-boîte)
+4. [Modifier ou supprimer un objet](#4-modifier-ou-supprimer-un-objet)
+5. [Modifier ou supprimer une boîte](#5-modifier-ou-supprimer-une-boîte)
+6. [Rechercher un objet](#6-rechercher-un-objet)
+7. [Inviter un membre de la famille](#7-inviter-un-membre-de-la-famille)
+8. [Rejoindre l'espace d'un proche](#8-rejoindre-lespace-dun-proche)
+9. [Gérer les membres](#9-gérer-les-membres)
+10. [Paramètres](#10-paramètres)
 11. [Installer l'app sur votre téléphone ou tablette](#11-installer-lapp-sur-votre-téléphone-ou-tablette)
 12. [Messages d'erreur courants](#12-messages-derreur-courants)
 
 ---
 
-## 1. Créer un compte
+## 1. Se connecter
 
-Deux façons de créer un compte :
-
-**Avec Google (recommandé — plus rapide)**
-1. Cliquez sur **Continuer avec Google**
-2. Choisissez votre compte Google dans la fenêtre qui s'ouvre
-3. Votre espace est créé automatiquement
-
-**Avec un email et un mot de passe**
-1. Cliquez sur **Créer un compte** en bas de la page de connexion
-2. Entrez votre email
-3. Choisissez un mot de passe d'au moins 6 caractères
-4. Confirmez le mot de passe
-5. Cliquez sur **Créer mon compte**
-
-> La première personne à créer un compte devient automatiquement l'**administrateur** de l'espace familial. Les autres membres rejoignent via un code d'invitation (voir section 9).
-
----
-
-## 2. Se connecter
+StorageApp utilise uniquement la connexion **Google**.
 
 1. Accédez à l'application
-2. Connectez-vous avec Google **ou** avec votre email + mot de passe
-3. Vous arrivez directement sur la liste de vos boîtes
+2. Cliquez sur **Continuer avec Google**
+3. Choisissez votre compte Google dans la fenêtre qui s'ouvre
+4. Vous arrivez directement sur la liste de vos boîtes
+
+> La première personne à se connecter devient automatiquement l'**administrateur** de l'espace familial. Les autres membres rejoignent via un lien d'invitation (voir section 8).
 
 ---
 
-## 3. Créer une boîte
+## 2. Créer une boîte
 
 Une boîte correspond à une vraie boîte physique — carton, bac, valise, etc.
 
@@ -61,7 +46,7 @@ La boîte reçoit automatiquement un numéro unique (#1, #2, #3…). Vous pouvez
 
 ---
 
-## 4. Ajouter un objet dans une boîte
+## 3. Ajouter un objet dans une boîte
 
 1. Cliquez sur une boîte pour l'ouvrir
 2. Cliquez sur **+ Ajouter**
@@ -80,7 +65,7 @@ Formats acceptés : JPEG, PNG, WebP, GIF, HEIC, HEIF — taille maximale : 10 Mo
 
 ---
 
-## 5. Modifier ou supprimer un objet
+## 4. Modifier ou supprimer un objet
 
 Dans une boîte, chaque objet affiché a deux boutons :
 
@@ -89,7 +74,7 @@ Dans une boîte, chaque objet affiché a deux boutons :
 
 ---
 
-## 6. Modifier ou supprimer une boîte
+## 5. Modifier ou supprimer une boîte
 
 Sur la page d'accueil, chaque boîte a deux boutons visibles au survol :
 
@@ -100,7 +85,7 @@ Sur la page d'accueil, chaque boîte a deux boutons visibles au survol :
 
 ---
 
-## 7. Rechercher un objet
+## 6. Rechercher un objet
 
 La barre de recherche est accessible en haut de toutes les pages.
 
@@ -113,11 +98,11 @@ La recherche porte sur le **nom** et la **description** de tous les objets de vo
 
 ---
 
-## 8. Inviter un membre de la famille
+## 7. Inviter un membre de la famille
 
 > Seul l'**administrateur** de l'espace peut générer des liens d'invitation.
 
-1. Cliquez sur l'icône **👥** en haut à droite de l'écran (à côté de la barre de recherche)
+1. Cliquez sur l'icône **👥** en haut à droite de l'écran
 2. Dans la section « Inviter un membre », cliquez sur **+ Générer un code d'invitation**
 3. Un **lien complet** apparaît, par exemple :
    `https://storage.sleeplow.ca/join?code=AB3C7D2E`
@@ -135,14 +120,14 @@ La personne n'a qu'à **cliquer sur le lien** — elle arrivera directement sur 
 
 ---
 
-## 9. Rejoindre l'espace d'un proche
+## 8. Rejoindre l'espace d'un proche
 
 Si un membre de votre famille vous a envoyé un lien d'invitation :
 
-**Étape 1 — Créer un compte** (si vous n'en avez pas encore)
+**Étape 1 — Se connecter** (si vous n'êtes pas encore connecté)
 1. Ouvrez le lien reçu dans votre navigateur
 2. Si vous n'êtes pas connecté, vous serez redirigé vers la page de connexion
-3. Créez un compte avec Google ou avec un email + mot de passe
+3. Connectez-vous avec **Continuer avec Google**
 
 **Étape 2 — Rejoindre l'espace**
 1. Une fois connecté, retournez sur le lien reçu (ou recliquez dessus)
@@ -155,7 +140,7 @@ Vous avez maintenant accès à l'espace familial et voyez toutes les boîtes.
 
 ---
 
-## 10. Gérer les membres
+## 9. Gérer les membres
 
 La page membres (icône **👥**) affiche :
 
@@ -167,6 +152,50 @@ La page membres (icône **👥**) affiche :
 2. Confirmez le retrait
 
 Le membre retiré perd immédiatement l'accès à l'espace et à toutes ses boîtes.
+
+---
+
+## 10. Paramètres
+
+Le panneau Paramètres s'ouvre en cliquant sur votre **photo de profil Google** en haut à droite.
+
+### Compte Google
+
+Affiche votre photo, votre nom et votre adresse courriel Google. Le **✕** à droite vous déconnecte (une confirmation est demandée).
+
+### Espace de rangement
+
+Affiche les statistiques de votre espace :
+- **Firebase** — nombre de boîtes et d'objets enregistrés
+- **Cloudinary** — nombre d'objets avec une photo
+
+### Membres
+
+Bouton raccourci pour accéder à la page de gestion des membres.
+
+### Apparence
+
+Bascule entre trois modes d'affichage :
+- **☀️ Clair** — toujours en mode clair
+- **⚙️ Système** — suit les préférences de votre appareil *(par défaut)*
+- **🌙 Sombre** — toujours en mode sombre
+
+Votre choix est mémorisé entre les sessions.
+
+### Rapporter un bug
+
+Si quelque chose ne fonctionne pas correctement :
+
+1. Cliquez sur **🐛 Rapporter un bug**
+2. Décrivez ce qui s'est passé dans le champ texte
+3. Le rapport inclut automatiquement le journal des actions de la session
+4. Cliquez sur **Envoyer par courriel** pour ouvrir votre client mail avec le rapport pré-rempli, ou **Copier le rapport** pour le coller ailleurs
+
+> Le journal de session ne contient aucune donnée personnelle — uniquement les types d'actions (connexion, création d'une boîte, etc.) et les codes d'erreur éventuels.
+
+### Déconnexion
+
+Le bouton **Déconnexion** en bas du panneau vous déconnecte après confirmation. Vous pouvez aussi vous déconnecter via le **✕** sur la ligne de votre compte Google.
 
 ---
 
@@ -197,8 +226,7 @@ Si vous rencontrez une erreur, elle s'affiche avec un code entre parenthèses. C
 | Code | Message affiché | Que faire |
 |------|----------------|-----------|
 | `ERR-AUTH-002` | Accès à votre espace refusé | Contactez l'administrateur de l'espace |
-| `ERR-AUTH-005` | Email ou mot de passe incorrect | Vérifiez vos identifiants |
-| `ERR-AUTH-006` | Email déjà utilisé | Connectez-vous ou utilisez un autre email |
+| `ERR-AUTH-007` | Connexion Google annulée | Réessayez et autorisez la fenêtre Google |
 | `ERR-AUTH-009` | Trop de tentatives | Attendez quelques minutes avant de réessayer |
 | `ERR-BOX-002` | Impossible de créer la boîte | Vérifiez votre connexion internet |
 | `ERR-ITEM-002` | Impossible de créer l'élément | La boîte a peut-être été supprimée, vous serez redirigé |
@@ -212,6 +240,4 @@ Si vous rencontrez une erreur, elle s'affiche avec un code entre parenthèses. C
 | `ERR-FIREBASE-001` | Action non autorisée | Déconnectez-vous et reconnectez-vous |
 | `ERR-FIREBASE-004` | Erreur réseau | Vérifiez votre connexion internet |
 
-Si le problème persiste, notez le code d'erreur et signalez-le à votre administrateur.
-</content>
-</invoke>
+Si le problème persiste, utilisez **🐛 Rapporter un bug** dans les Paramètres pour envoyer le journal de session à l'administrateur.
