@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
+import { appError, mapFirebaseError } from '../services/errorCodes'
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -46,7 +47,7 @@ export default function RegisterPage() {
 
       navigate('/')
     } catch (err) {
-      setError(getErrorMessage(err.code))
+      setError(appError(mapFirebaseError(err) ?? 'AUTH-004', err))
     } finally {
       setLoading(false)
     }
@@ -60,8 +61,8 @@ export default function RegisterPage() {
       await signInWithPopup(auth, googleProvider)
       navigate('/')
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError(getErrorMessage(err.code))
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError(appError(mapFirebaseError(err) ?? 'AUTH-007', err))
       }
     } finally {
       setLoading(false)
@@ -151,15 +152,3 @@ function GoogleIcon() {
   )
 }
 
-function getErrorMessage(code) {
-  switch (code) {
-    case 'auth/email-already-in-use':
-      return 'Cet email est déjà utilisé.'
-    case 'auth/invalid-email':
-      return 'Adresse email invalide.'
-    case 'auth/weak-password':
-      return 'Mot de passe trop faible. Minimum 6 caractères.'
-    default:
-      return 'Une erreur est survenue. Réessayez.'
-  }
-}

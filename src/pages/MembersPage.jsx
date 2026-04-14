@@ -11,6 +11,7 @@ export default function MembersPage() {
   const [generatingCode, setGeneratingCode] = useState(false)
   const [removingMember, setRemovingMember] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [opError, setOpError] = useState('')
 
   const isAdmin = members.find((m) => m.uid === user?.uid)?.role === 'admin'
 
@@ -21,9 +22,12 @@ export default function MembersPage() {
 
   const loadMembers = async () => {
     setLoading(true)
+    setOpError('')
     try {
       const data = await getWorkspaceMembers(workspaceId)
       setMembers(data)
+    } catch (err) {
+      setOpError(err.message)
     } finally {
       setLoading(false)
     }
@@ -31,9 +35,12 @@ export default function MembersPage() {
 
   const handleGenerateCode = async () => {
     setGeneratingCode(true)
+    setOpError('')
     try {
       const code = await createInvite(workspaceId, user.uid)
       setInviteCode(code)
+    } catch (err) {
+      setOpError(err.message)
     } finally {
       setGeneratingCode(false)
     }
@@ -46,17 +53,20 @@ export default function MembersPage() {
   }
 
   const handleRemove = async () => {
+    setOpError('')
     try {
       await removeMember(workspaceId, removingMember.uid)
       setRemovingMember(null)
       loadMembers()
-    } catch {
-      // ignorer
+    } catch (err) {
+      setOpError(err.message)
+      setRemovingMember(null)
     }
   }
 
   return (
     <div className="page">
+      {opError && <p className="error-message" style={{ marginBottom: '1rem' }}>{opError}</p>}
       <div className="page-header">
         <h2>Membres de l&apos;espace</h2>
       </div>

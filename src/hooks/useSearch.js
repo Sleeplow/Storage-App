@@ -1,8 +1,9 @@
-import { useEffect, useState, useMemo } from 'react'
-import { collectionGroup, onSnapshot, query } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
+import { collectionGroup, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '../services/firebase'
+import { appError } from '../services/errorCodes'
 
-// Charge tous les items du workspace via collectionGroup et filtre en local
+// Abonnement temps réel sur tous les items du workspace via collectionGroup filtré côté serveur
 export function useSearch(workspaceId) {
   const [allItems, setAllItems] = useState([])
   const [loadingSearch, setLoadingSearch] = useState(true)
@@ -10,22 +11,29 @@ export function useSearch(workspaceId) {
   useEffect(() => {
     if (!workspaceId) return
 
-    // collectionGroup('items') récupère tous les items de tous les workspace —
-    // les règles Firestore limiteront l'accès au bon workspace en production.
-    // Pour l'instant on filtre côté client sur workspaceId (présent dans le path).
-    const q = query(collectionGroup(db, 'items'))
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const items = snap.docs
-        .filter((d) => d.ref.path.includes(`workspaces/${workspaceId}`))
-        .map((d) => {
-          // path = workspaces/{wsId}/boxes/{boxId}/items/{itemId}
+    // Filtre côté serveur : seuls les items avec workspaceId == workspaceId sont retournés.
+    // Les règles Firestore garantissent l'accès — ce filtre est une défense en profondeur.
+    const q = query(
+      collectionGroup(db, 'items'),
+      where('workspaceId', '==', workspaceId)
+    )
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const items = snap.docs.map((d) => {
           const pathParts = d.ref.path.split('/')
           const boxId = pathParts[3]
           return { id: d.id, boxId, ...d.data() }
         })
-      setAllItems(items)
-      setLoadingSearch(false)
-    })
+        setAllItems(items)
+        setLoadingSearch(false)
+      },
+      (err) => {
+        appError('SEARCH-001', err)
+        setLoadingSearch(false)
+      }
+    )
 
     return unsubscribe
   }, [workspaceId])
@@ -39,10 +47,10 @@ export function useSearch(workspaceId) {
           item.name?.toLowerCase().includes(lower) ||
           item.description?.toLowerCase().includes(lower)
       )
-      .map((item) => {
-        const box = boxes.find((b) => b.id === item.boxId)
-        return { ...item, box }
-      })
+      .map((item) => ({
+        ...item,
+        box: boxes.find((b) => b.id === item.boxId),
+      }))
   }
 
   return { search, loadingSearch }

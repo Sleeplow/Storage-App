@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { onSnapshot } from 'firebase/firestore'
 import { getBoxesQuery } from '../services/boxService'
+import { appError } from '../services/errorCodes'
 
 export function useBoxes(workspaceId) {
   const [boxes, setBoxes] = useState([])
@@ -19,8 +20,7 @@ export function useBoxes(workspaceId) {
         setLoading(false)
       },
       (err) => {
-        console.error('useBoxes error:', err)
-        setError(err)
+        setError(new Error(appError('BOX-001', err)))
         setLoading(false)
       }
     )
