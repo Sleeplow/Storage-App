@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 
 export default function BoxCard({ box, onEdit, onDelete }) {
-  const itemLabel = box.itemCount === 1 ? 'élément' : 'éléments'
+  const count = box.itemCount ?? 0
+  const itemLabel = count === 1 ? 'item' : 'items'
 
   return (
     <div className="box-card">
@@ -9,10 +10,14 @@ export default function BoxCard({ box, onEdit, onDelete }) {
         <div className="box-number">#{box.number}</div>
         <div className="box-info">
           <h3 className="box-name">{box.name}</h3>
-          <span className="box-count">
-            {box.itemCount ?? 0} {itemLabel}
-          </span>
+          {box.location && (
+            <span className="box-location">📍 {box.location}</span>
+          )}
         </div>
+        <span className="box-count-badge">
+          {count}
+          <span className="box-count-label">{itemLabel}</span>
+        </span>
         <span className="box-arrow">›</span>
       </Link>
       <div className="box-actions">

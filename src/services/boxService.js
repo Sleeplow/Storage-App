@@ -25,12 +25,13 @@ async function getNextBoxNumber(workspaceId) {
   return Math.max(...numbers) + 1
 }
 
-export async function createBox(workspaceId, { name }, userId) {
+export async function createBox(workspaceId, { name, location }, userId) {
   try {
     const number = await getNextBoxNumber(workspaceId)
     const docRef = await addDoc(boxesRef(workspaceId), {
       number,
       name: name.trim(),
+      location: location?.trim() || '',
       itemCount: 0,
       createdAt: serverTimestamp(),
       createdBy: userId,
@@ -42,10 +43,11 @@ export async function createBox(workspaceId, { name }, userId) {
   }
 }
 
-export async function updateBox(workspaceId, boxId, { name }) {
+export async function updateBox(workspaceId, boxId, { name, location }) {
   try {
     await updateDoc(doc(db, 'workspaces', workspaceId, 'boxes', boxId), {
       name: name.trim(),
+      location: location?.trim() || '',
     })
     logAction('box', 'update', name.trim())
   } catch (err) {

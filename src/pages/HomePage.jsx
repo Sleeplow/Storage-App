@@ -19,11 +19,11 @@ export default function HomePage() {
 
   const nextNumber = boxes.length > 0 ? Math.max(...boxes.map((b) => b.number)) + 1 : 1
 
-  const handleCreate = async ({ name }) => {
+  const handleCreate = async ({ name, location }) => {
     setSaving(true)
     setOpError('')
     try {
-      await createBox(workspaceId, { name }, user.uid)
+      await createBox(workspaceId, { name, location }, user.uid)
       setShowForm(false)
     } catch (err) {
       setOpError(err.message)
@@ -32,11 +32,11 @@ export default function HomePage() {
     }
   }
 
-  const handleEdit = async ({ name }) => {
+  const handleEdit = async ({ name, location }) => {
     setSaving(true)
     setOpError('')
     try {
-      await updateBox(workspaceId, editingBox.id, { name })
+      await updateBox(workspaceId, editingBox.id, { name, location })
       setEditingBox(null)
     } catch (err) {
       setOpError(err.message)

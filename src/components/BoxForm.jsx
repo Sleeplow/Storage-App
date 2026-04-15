@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 
 export default function BoxForm({ initial = null, nextNumber, onSubmit, onClose, loading }) {
   const [name, setName] = useState(initial?.name ?? '')
+  const [location, setLocation] = useState(initial?.location ?? '')
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -11,10 +12,10 @@ export default function BoxForm({ initial = null, nextNumber, onSubmit, onClose,
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!name.trim()) return
-    onSubmit({ name })
+    onSubmit({ name, location })
   }
 
-  const title = initial ? `Modifier la boîte ${initial.number}` : `Nouvelle boîte — #${nextNumber}`
+  const title = initial ? `Modifier la boîte #${initial.number}` : `Nouvelle boîte — #${nextNumber}`
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -32,6 +33,17 @@ export default function BoxForm({ initial = null, nextNumber, onSubmit, onClose,
               placeholder="ex : Cuisine d'été, Outils garage…"
               maxLength={60}
               required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="box-location">Lieu <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optionnel)</span></label>
+            <input
+              id="box-location"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="ex : Sous-sol, Garage, Chambre #2…"
+              maxLength={60}
             />
           </div>
           <div className="confirm-actions">
